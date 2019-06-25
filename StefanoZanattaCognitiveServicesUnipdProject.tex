@@ -34,7 +34,7 @@ For the \textbf{Cognitive Services - Unipd} Project, I implemented a Deep Convol
 \label{sec:introduction}
 This project involves the implementation of the DCNN for image denoising\footnote{\url{https://web.stanford.edu/class/cs331b/2016/projects/zhao.pdf}} described in the abstract, toghether with the analisys of the results and the comparison with the state of the art image denoisers.\\
 While classic image denoisers have fully connected layers, the Aojia Zhao one does not have any, reducing the required weights of the model. To further reduce the required weights, this model uses direct connections between each Conv layer and its relative Deconv layer.\\
-The implementation of the project can be found here: https://colab.research.google.com/drive/14dAdoKLWbCKEJStnLlHphoO-L2mhsVTG.
+The implementation of the project can be found in the footnote \footnote{\url{https://colab.research.google.com/drive/14dAdoKLWbCKEJStnLlHphoO-L2mhsVTG}}.
 
 \section{Technologies}
 \label{sec:technologies}
@@ -98,12 +98,13 @@ Direct connections are implemented by adding the output of a Conv layer with the
 
 \subsection{Training}
 Training was done on two datasets\ref{subsec:dataset}, $128\times128$ and $64\times128$ images. The 128 images required much more resources then the 64 ones, this required reducing the epochs and the number of training dataset.\\
+MSE was used as the minimization function in both cases, and the categorical\_accuracy for evaluating the model (the default accuracy for keras).
 \begin{table}[H] \label{tab:training}
     \centering
     \begin{tabular}{l|c|c|c|c|c|c}
-    Experiment       &  Validation acc & Test acc & todo Metric \\\hline
-    1          &  0.7067           & todo      &  todo       \\\hline
-    2          &  0.7270        & 0.718220      &  todo
+    Experiment       &  Validation acc & Test acc \\\hline
+    1          &  0.7067           & todo            \\\hline
+    2          &  todo 75        & todo    
     \end{tabular}
     \caption{\label{tab:widgets}Training results}
     \end{table}
@@ -116,14 +117,18 @@ Using 35 epochs, the model stabilized on 0.70 accuracy after few epochs. Changin
 \caption{\label{fig:your-figure}Training results for experiment 1}
 \end{figure}
 
-\subsection{Experiment 2}
+\subsection{Experiment 2}\label{subs:ex2}
 $64\times64$ images were used for the second experiment, as suggested in the Zhao paper. The training was done on 11000 training images, 1100 of them are used for validation.\\
-It went better then Experiment 1, because the accuracy did not saturate at 0.70, but keeps increasing with the epochs.
+Experiment2 showed better results than Experiment 1, because the accuracy did not saturate at 0.70, but it keept increasing with the epochs.
 
 \subsection{Results}
-
+Even if the model reached just an accuracy of about 0.75, the model could probably reach better results with doubled epochs (around 9 hours of training).\\
+The batch size of 10 avoided overfitting. In fact, in the first experiments, increasing the batch size implied a faster growth of the train accuracy, but reduced the validation accuracy.
+As i mentioned in the Experiment2 section\ref{subs:ex2}, the model is made for small images, so just for research purposes. Increasing the model complexity would allow to use bigger images, but at the cost of GPU power.
 
 \subsection{Comparison with state of the art models}
+To understand how a state of the art models works, i took \textbf{Xiao-Jiao Mao, Chunhua Shen, Yu-Bin Yang's project}\footnote{\url{https://arxiv.org/pdf/1606.08921v3.pdf}} as banchmark. They worked with bigger images, days of training, bigger models (30 layers instead of 10) and different evaluating methods, but still using a DCNN with direct connections.\\
+This paper suggests to use small filter size, in fact the filters in the Zhao DCNN were reduced from 64x64 to 4x4. 
 
 \begin{acknowledgments}
 
