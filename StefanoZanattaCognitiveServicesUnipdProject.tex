@@ -55,7 +55,7 @@ During the development of the project, I found some downsides:
 \end{itemize}
 
 \subsection{Keras}
-Keras is the main API used for the project, using Tensorflow as backend. Keras offers a simpler interface than Tensorflow, making the process of building the model, training and showing the results easier.  
+Keras is the main API used for the project, using Tensorflow as backend. Keras offers a simpler interface than Tensorflow, making the process of building the model, training and showing the results easier.
 
 \subsection{Dataset}
 \label{subsec:dataset}
@@ -130,11 +130,11 @@ The layers connections are better described by the following image:
     \caption{\label{fig:noise}Model}
 \end{figure}
 \subsection{Training}
-Training was done on two datasets\ref{subsec:dataset}, $128\times128$ and $64\times128$ images. The 128 images required much more resources then the 64 ones, this required reducing the epochs and the number of training dataset.\\
+Training was done on two datasets\ref{subsec:dataset}: $128\times128$ (Experiment 1) and $64\times128$ (Experiment 2 and 3) images, on a GPU. The 128 images required much more resources then the 64 ones, this required reducing the epochs and the number of training dataset.\\
 MSE was used as the minimization function in both cases, and the categorical\_accuracy for evaluating the model (the default accuracy for keras).\\
 Stochastic Gradient Descent was used as the optimizer. Early stopping was not used, to reduce the usage of the RAM.\\
 For every experiment, test accuracy was lower then Validation accuracy, meaning that the model suffers of underfitting (should use more images for training). 
-
+Each Experiment training session took about 5 hours to complete.
 \begin{table}[H] \label{tab:training}
     \centering
     \begin{tabular}{l|c|c|c|c|c|c}
@@ -177,7 +177,7 @@ Test accuracy was better then the Experiment 2. This may be because, with more f
 
 
 \subsection{Results}
-Even if the model reached an accuracy of about 0.75, the model could probably reach better results with doubled epochs (around 9 hours of training).\\
+Even if the models reached an accuracy of about 0.75, they could probably reach better results with doubled epochs (around 9 hours of training).\\
 The batch size of 10 avoided overfitting. In fact, in the first experiments, increasing the batch size implied a faster growth of the train accuracy, but reduced the validation accuracy.
 As I mentioned in the Experiment 1 section\ref{subs:ex1}, the model is made for small images, so just for research purposes. Increasing the model complexity would allow to use bigger images, but at the cost of GPU power.\\
 
