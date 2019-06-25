@@ -32,9 +32,9 @@ For the \textbf{Cognitive Services - Unipd} Project, I implemented a Deep Convol
 
 \section{Introduction}
 \label{sec:introduction}
-This project involves the implementation of the DCNN for image denoising\footnote{\url{https://web.stanford.edu/class/cs331b/2016/projects/zhao.pdf}} described in the abstract, toghether with the analisys of the results and the comparison with the state of the art image denoisers.\\
+This project involves the implementation of the DCNN for image denoising\footnote{\url{https://web.stanford.edu/class/cs331b/2016/projects/zhao.pdf}} described in the abstract, together with the analisys of the results and the comparison with the state of the art image denoisers.\\
 While classic image denoisers have fully connected layers, the Aojia Zhao one does not have any, reducing the required weights of the model. To further reduce the required weights, this model uses direct connections between each Conv layer and its relative Deconv layer.\\
-The Google Golab implementation of the project can be found in the footnote \footnote{\url{https://colab.research.google.com/drive/14dAdoKLWbCKEJStnLlHphoO-L2mhsVTG}}.
+The Google Colab implementation of the project can be found in the footnote \footnote{\url{https://colab.research.google.com/drive/14dAdoKLWbCKEJStnLlHphoO-L2mhsVTG}}.
 
 \section{Technologies}
 \label{sec:technologies}
@@ -60,7 +60,7 @@ Keras is the main API used for the project, using Tensorflow as backend. Keras o
 \subsection{Dataset}
 \label{subsec:dataset}
 The dataset was the most complex part of the project. Finding the right images and saving them in an efficient way was the biggest challange.\\
-For training and testing, i used the 'google-landmark' dataset\footnote{\url{https://github.com/cvdfoundation/google-landmark.git}}. This dataset is downloadable by calling a bash script, and the size of it can be customizable (i chose 1GB of images).\\
+For training and testing, I used the 'google-landmark' dataset\footnote{\url{https://github.com/cvdfoundation/google-landmark.git}}. This dataset is downloadable by calling a bash script, and the size of it can be customizable (i chose 1GB of images).\\
 Preprocessing was required to:
 \begin{itemize}
     \item move the images in a "train" and "test" folders;
@@ -68,15 +68,17 @@ Preprocessing was required to:
     \item insert noise;
     \item save the train and test images in numpy files, in this form: $2\times$N$\times$\textit{dim}$\times$\textit{dim}, where 'N' is the number of images in the training or testing set, and '\textit{dim}' is the dimensions of the images 
 \end{itemize}
-To avoid running the preprocessing passages all the times, i also created a script to store and load the numpy files from Google Drive.\\
+To avoid running the preprocessing passages all the times, I also created a script to store and load the numpy files from Google Drive.\\
 In the table\ref{tab:dataset} are listed the dataset used for each experiment. As mentioned in the Google Colab section\ref{subsec:colab:downsides}, the limited RAM defined the size of the following parameters (higher definition = fewer examples or less epochs).\\
-A first experiment with a high definition image saturated the RAM with few epocs, with a validation accuracy of 0.20. For this reason that experiment was not included in the analisis.
+A first experiment with a high definition image saturated the RAM with few epochs, with a validation accuracy of 0.20. For this reason that experiment was not included in the analisys.
+In total, i did tree main experiments:
 \begin{table}[H] \label{tab:dataset}
     \centering
     \begin{tabular}{l|c|c|c|c|c|c}
-    \#         & Train           & val/tot\* & Test       & size       & batch size & epochs \\\hline
-    1          &  4000           & 0.2      &  375       &  128x128    & 10   &  35 \\\hline
-    2          &  11000          & 0.1      &  375       &  64x64      & 10     &  100
+    \#         & Train           & val/tot\* & Test       & img size       & batch size & epochs \\\hline
+    1          &  4000           & 0.2      &  375       &  128x128    & 30   &  35 \\\hline
+    2          &  11000          & 0.1      &  375       &  64x64      & 10     &  150\\\hline
+    3          &  11000          & 0.1      &  375       &  64x64      & 10     &  135
     \end{tabular}
     \caption{\label{tab:widgets}Dataset for the different experiments}
     \end{table}
@@ -92,11 +94,16 @@ The following functions were used to insert noise into images:
 %\includegraphics[width=\textwidth]{your-figure's-file-name}
 %\caption{\label{fig:your-figure}Caption goes here.}
 %\end{figure}
-The following images are a small example of the noised images in the training set.
+Example of the salt \& pepper noised images in the training set (used for experiment 2).
 \begin{figure}[H]
-    \includegraphics[width=0.5\textwidth]{images/64_full_noise.png}
-    \caption{\label{fig:noise}noised images}
-    \end{figure}
+    \includegraphics[width=0.45\textwidth]{images/64_full_noise.png}
+    \caption{\label{fig:noise} salt \& pepper noised images}
+\end{figure}
+Example of the salt \& pepper plus "Gaussian filter" (blur) noised images in the training set (used for experiment 3).
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{images/64x64.png}
+    \caption{\label{fig:noise} salt \& pepper and blurred noised images}
+\end{figure}
 \subsection{Model}
 The model consists of 5 Convolutional (Conv) layers and 5 Deconvolutional (Deconv) layers. Each layer is connected to the following one (e.g. Conv2 with Conv3).\\
 Direct connections are implemented by adding the output of a Conv layer with the output of the "opposite" Deconv layer (e.g. Conv2 with Deconv3), and using that result as the input of the next Deconv layer (e.g. Conv2 + Deconv3 is the input of Deconv4 ).\\
@@ -126,62 +133,79 @@ The layers connections are better described by the following image:
 Training was done on two datasets\ref{subsec:dataset}, $128\times128$ and $64\times128$ images. The 128 images required much more resources then the 64 ones, this required reducing the epochs and the number of training dataset.\\
 MSE was used as the minimization function in both cases, and the categorical\_accuracy for evaluating the model (the default accuracy for keras).\\
 Stochastic Gradient Descent was used as the optimizer. Early stopping was not used, to reduce the usage of the RAM.\\
+For every experiment, test accuracy was lower then Validation accuracy, meaning that the model suffers of underfitting (should use more images for training). 
 
 \begin{table}[H] \label{tab:training}
     \centering
     \begin{tabular}{l|c|c|c|c|c|c}
     Experiment       &  Validation acc & Test acc \\\hline
-    1          &  0.7067           & 0.68            \\\hline
-    2          &  0.7663        &   todo  
+    1          &  0.7067           & 0.5800            \\\hline
+    2          &  0.7663        &   0.6200            \\\hline
+    3          &  0.7209              &0.6420         
     \end{tabular}
     \caption{\label{tab:widgets}Training results}
     \end{table}
 
 \subsection{Experiment 1 - $128\times128$}\label{subs:ex1}
-$128\times128$ images images were used for the first experiment, using doubled the size required from the Zhao paper. This quickly saturated the RAM, so reduced the dataset elements and the epochs by more than 50\%.\\
-Using 35 epochs, the model stabilized on 0.70 accuracy after few epochs. Changing epocs did not change this result. This probably means that increasing the complexity of the model is required to fit bigger images. This is not possible with Google Colab resources, for the RAM and GPU limits.\\
+$128\times128$ images images were used for the first experiment, using doubled the size required from the Zhao paper. Salt \& pepper was used as the noise. This quickly saturated the RAM, so reduced the dataset elements and the epochs by more than 50\%.\\
+Using 35 epochs, the model stabilized on 0.70 accuracy after few epochs. Changing epochs did not change this result. This probably means that increasing the complexity of the model is required to fit bigger images. This is not possible with Google Colab resources, for the RAM and GPU limits.\\
 \begin{figure}[H]
 \includegraphics[width=0.5\textwidth]{images/128x128_35epoch_10batch_fit.png}
 \caption{\label{fig:your-figure}Training results for experiment 1}
 \end{figure}
 
-\subsection{Experiment 2 - $64\times64$}
-$64\times64$ sized images were used for the second experiment, as suggested in the Zhao paper. The training was done on 11000 training images, 1100 of them are used for validation.\\
-Experiment2 showed better results than Experiment 1, because the accuracy did not saturate at 0.70, but it keept increasing with the epochs (this can be seen from the following images).
-\begin{figure}[H]
-    \includegraphics[width=0.45\textwidth]{images/fit_first_64x150.PNG}
-    \caption{\label{fig:ex2}First epochs - Experiment 2}
-\end{figure}
+\subsection{Experiment 2 - $64\times64$}\label{subs:ex2}
+$64\times64$ sized images were used for the second experiment as suggested in the Zhao paper. Images were altered only with salt and pepper noise. The training was done on 11000 training images, 1100 of them are used for validation.\\
+Experiment 2 showed better results than Experiment 1, because the accuracy did not saturate at 0.70, but it kept increasing with the epochs (as shown in the following image).\\
 \begin{figure}[H]
     \includegraphics[width=0.45\textwidth]{images/fit_last_64x150.PNG}
     \caption{\label{fig:noise}Last Epochs - Experiment 2}
 \end{figure}
 
+\subsection{Experiment 3 - $64\times64$}
+Experiment 3 was almost the same as Experiment 2\ref{subs:ex2}, with the difference that blur noise were added to salt \& pepper noise, and the epochs were reduced to 135. As espected, the train time for each epoch increased by ~50 seconds (from ~83 to ~132).\\
+Test accuracy was better then the Experiment 2. This may be because, with more features to learn, the algorithm managed to learn more significant weights (each weight has more 'value').
+
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{images/fullnoise_fit_1.PNG}
+    \caption{\label{fig:noise}First Epochs - Experiment 3}
+\end{figure}
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{images/fullnoise_fit_2.PNG}
+    \caption{\label{fig:noise}Last Epochs - Experiment 3}
+\end{figure}
+
+
 \subsection{Results}
 Even if the model reached an accuracy of about 0.75, the model could probably reach better results with doubled epochs (around 9 hours of training).\\
 The batch size of 10 avoided overfitting. In fact, in the first experiments, increasing the batch size implied a faster growth of the train accuracy, but reduced the validation accuracy.
-As i mentioned in the Experiment 1 section\ref{subs:ex1}, the model is made for small images, so just for research purposes. Increasing the model complexity would allow to use bigger images, but at the cost of GPU power.\\
+As I mentioned in the Experiment 1 section\ref{subs:ex1}, the model is made for small images, so just for research purposes. Increasing the model complexity would allow to use bigger images, but at the cost of GPU power.\\
 
 The cleaned images are kinda blurred, but the model did a great job at removing the salt and pepper noise. With more training, the results would have been less blurred (and closer to the original image).
 \begin{figure}[H]
     \includegraphics[width=0.45\textwidth]{images/prediction.png}
-    \caption{\label{fig:noise}Clean - Noised - Original}
+    \caption{\label{fig:noise}Clean - Noised - Original \{experiment 2\}}
+\end{figure}
+With a white uniform background, it was difficult for the model to remove the black pixels. 
+\begin{figure}[H]
+    \includegraphics[width=0.45\textwidth]{images/fulllastimage.png}
+    \caption{\label{fig:noise}Clean - Noised - Original  \{Experiment 3\}}
 \end{figure}
 
-\subsection{Comparison with state of the art models and possible improvments to this model}
-To understand how a state of the art models work, i took \textbf{Xiao-Jiao Mao, Chunhua Shen, Yu-Bin Yang's project}\footnote{\url{https://arxiv.org/pdf/1606.08921v3.pdf}} as banchmark. They worked with bigger images, days of training, bigger models (30 layers instead of 10) and different evaluating methods, but still using a DCNN with direct connections.\\
+\subsection{Comparison with state of the art models and possible improvements to this model}
+To understand how a state of the art models work, I took \textbf{Xiao-Jiao Mao, Chunhua Shen, Yu-Bin Yang's project}\footnote{\url{https://arxiv.org/pdf/1606.08921v3.pdf}} as benchmark. They worked with bigger images, days of training, bigger models (30 layers instead of 10) and different evaluating methods, but still using a DCNN with direct connections.\\
 This paper suggests to use small filter size, in fact the filters Zhao (\textit{the author of the model I implemented}) suggested are $4\times4$. \\
 The evaluating method they used is the \textit{Peak Signal to Noise Ratio} (PSNR).\\
 \begin{center}
 $PSNR=10\times{\log_{10} ({R^2/MSE})}$     
 \end{center}
-Where R is the maximum fluctuation in the input image data type (e.g. 8bit image has R = 255) and MSE is the Mean Squared Error.
+Where R is the maximum fluctuation in the input image data type (e.g. 8bit image has R = 255) and MSE is the Mean Squared Error. This metric is better rappresented in a graph than the MSE, because of the logarithm.
 
 \begin{acknowledgments}
     \begin{itemize}
         \item Image Denoising with Deep Convolutional Neural Networks\footnote{\url{https://web.stanford.edu/class/cs331b/2016/projects/zhao.pdf}} - Author: Aojia Zhao - Stanford University, on which I based my project;
         \item Image Restoration Using Convolutional Auto-encoders with Symmetric Skip Connections\footnote{\url{https://arxiv.org/pdf/1606.08921v3.pdf}} - Authors: Xiao-Jiao Mao, Chunhua Shen, Yu-Bin Yang;
-        \item Papers with code website\footnote{\url{https://paperswithcode.com/task/image-denoising}}, where i found the state of the art papers;
+        \item Papers with code website\footnote{\url{https://paperswithcode.com/task/image-denoising}}, where I found the state of the art papers;
         \item Google Colab\footnote{\url{https://colab.research.google.com/notebooks/}}
     \end{itemize}
 \end{acknowledgments}
